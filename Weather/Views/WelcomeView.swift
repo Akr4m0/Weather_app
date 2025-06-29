@@ -27,9 +27,16 @@ struct WelcomeView: View {
                     .foregroundColor(.white)
                 
                 // Custom location button
-                Button(action: {
-                    locationManager.requestLocation()
-                }) {
+                // Replace the location button in WelcomeView with this:
+
+                AnimatedButton(
+                    title: "Share Location",
+                    icon: "location.fill",
+                    action: {
+                        locationManager.requestLocation()
+                    }
+                )
+                .padding(.top, 20)
                     HStack(spacing: 12) {
                         Image(systemName: "location.fill")
                         Text("Share Location")
@@ -45,7 +52,7 @@ struct WelcomeView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
-}
+
 
 #Preview {
     WelcomeView()

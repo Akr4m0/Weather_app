@@ -14,13 +14,39 @@ class WeatherManager {
             throw WeatherError.invalidURL
         }
         
-        let (data, response) = try await URLSession.shared.data(for: URLRequest(url: url))
-        
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw WeatherError.invalidResponse
+        do {
+            let (data, response) = try await URLSession.shared.data(for: URLRequest(url: url))
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw WeatherError.invalidResponse
+            }
+            
+            switch httpResponse.statusCode {
+            case 200:
+                return try JSONDecoder().decode(ResponseBody.self, from: data)
+            case 404:
+                throw WeatherError.apiError(404)
+            case 401:
+                throw WeatherError.apiError(401)
+            case 500...599:
+                throw WeatherError.apiError(httpResponse.statusCode)
+            default:
+                throw WeatherError.invalidResponse
+            }
+        } catch let error as URLError {
+            switch error.code {
+            case .notConnectedToInternet:
+                throw WeatherError.networkError("No internet connection")
+            case .timedOut:
+                throw WeatherError.networkError("Request timed out")
+            default:
+                throw WeatherError.networkError(error.localizedDescription)
+            }
+        } catch let error as WeatherError {
+            throw error
+        } catch {
+            throw WeatherError.invalidData
         }
-        
-        return try JSONDecoder().decode(ResponseBody.self, from: data)
     }
     
     func getForecast(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async throws -> ForecastResponse {
@@ -28,19 +54,39 @@ class WeatherManager {
             throw WeatherError.invalidURL
         }
         
-        let (data, response) = try await URLSession.shared.data(for: URLRequest(url: url))
-        
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw WeatherError.invalidResponse
+        do {
+            let (data, response) = try await URLSession.shared.data(for: URLRequest(url: url))
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw WeatherError.invalidResponse
+            }
+            
+            switch httpResponse.statusCode {
+            case 200:
+                return try JSONDecoder().decode(ForecastResponse.self, from: data)
+            case 404:
+                throw WeatherError.apiError(404)
+            case 401:
+                throw WeatherError.apiError(401)
+            case 500...599:
+                throw WeatherError.apiError(httpResponse.statusCode)
+            default:
+                throw WeatherError.invalidResponse
+            }
+        } catch let error as URLError {
+            switch error.code {
+            case .notConnectedToInternet:
+                throw WeatherError.networkError("No internet connection")
+            case .timedOut:
+                throw WeatherError.networkError("Request timed out")
+            default:
+                throw WeatherError.networkError(error.localizedDescription)
+            }
+        } catch let error as WeatherError {
+            throw error
+        } catch {
+            throw WeatherError.invalidData
         }
-        
-        return try JSONDecoder().decode(ForecastResponse.self, from: data)
-    }
-    
-    enum WeatherError: Error {
-        case invalidURL
-        case invalidResponse
-        case invalidData
     }
 }
 

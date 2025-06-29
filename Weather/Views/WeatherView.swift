@@ -7,6 +7,16 @@ import SwiftUI
 
 struct WeatherView: View {
     var weather: ResponseBody
+    @State private var lastUpdated = Date()
+    @State private var showToast = false
+    var onRefresh: (() async -> Void)?
+    
+    // Time formatter
+    var timeFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter
+    }
     
     // Function to get the appropriate weather icon
     func getWeatherIcon(condition: String) -> String {
@@ -37,60 +47,87 @@ struct WeatherView: View {
     }
     
     var body: some View {
-        ZStack(alignment: .leading) {
-            VStack {
-                // Top section with location and date
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(weather.name)
-                        .bold()
-                        .font(.title)
-                    
-                    Text("Today, \(Date().formatted(.dateTime.month().day().hour().minute()))")
-                        .fontWeight(.light)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 50)
-                
-                Spacer()
-                
-                // Middle section with weather icon and temperature
+        ZStack {
+            ScrollView {
                 VStack {
+                    // Last updated indicator
                     HStack {
-                        VStack(spacing: 20) {
-                            Image(systemName: getWeatherIcon(condition: weather.weather[0].description))
-                                .font(.system(size: 50))
+                        Image(systemName: "clock")
+                            .font(.caption)
+                        Text("Updated: \(lastUpdated, formatter: timeFormatter)")
+                            .font(.caption)
+                    }
+                    .foregroundColor(.white.opacity(0.6))
+                    .padding(.top, 10)
+                    
+                    // Top section with location and date
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(weather.name)
+                            .bold()
+                            .font(.title)
+                        
+                        Text("Today, \(Date().formatted(.dateTime.month().day().hour().minute()))")
+                            .fontWeight(.light)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 30)
+                    
+                    Spacer(minLength: 50)
+                    
+                    // Middle section with weather icon and temperature
+                    VStack {
+                        HStack {
+                            VStack(spacing: 20) {
+                                Image(systemName: getWeatherIcon(condition: weather.weather[0].description))
+                                    .font(.system(size: 50))
+                                
+                                Text(weather.weather[0].main)
+                            }
+                            .frame(width: 150, alignment: .leading)
                             
-                            Text(weather.weather[0].main)
+                            Spacer()
+                            
+                            Text(weather.main.feelsLike.roundDouble() + "°")
+                                .font(.system(size: 100))
+                                .fontWeight(.bold)
+                                .padding()
                         }
-                        .frame(width: 150, alignment: .leading)
                         
                         Spacer()
+                            .frame(height: 50)
                         
-                        Text(weather.main.feelsLike.roundDouble() + "°")
-                            .font(.system(size: 100))
-                            .fontWeight(.bold)
-                            .padding()
+                        // City image
+                        AsyncImage(url: URL(string: "https://cdn.pixabay.com/photo/2018/12/10/16/22/city-3867295_1280.png")) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 350)
+                        } placeholder: {
+                            ProgressView()
+                        }
+                        
+                        Spacer()
                     }
-                    
-                    Spacer()
-                        .frame(height: 50)
-                    
-                    // City image
-                    AsyncImage(url: URL(string: "https://cdn.pixabay.com/photo/2018/12/10/16/22/city-3867295_1280.png")) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 350)
-                    } placeholder: {
-                        ProgressView()
-                    }
-                    
-                    Spacer()
+                    .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity)
+                .padding()
+                .padding(.bottom, 200) // Add padding for the weather details panel
             }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .refreshable {
+                if let onRefresh = onRefresh {
+                    await onRefresh()
+                    lastUpdated = Date()
+                    
+                    // Haptic feedback
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                    impactFeedback.impactOccurred()
+                    
+                    // Show toast
+                    withAnimation {
+                        showToast = true
+                    }
+                }
+            }
             
             // Bottom white panel with weather details
             VStack {
@@ -131,6 +168,33 @@ struct WeatherView: View {
                 .background(.white)
                 .cornerRadius(20, corners: [.topLeft, .topRight])
                 .padding(.bottom, 80)
+            }
+            
+            // Toast notification
+            VStack {
+                if showToast {
+                    HStack(spacing: 12) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.title3)
+                        Text("Weather updated")
+                            .font(.body)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(Color.black.opacity(0.8))
+                    .cornerRadius(25)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .padding(.top, 50)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            withAnimation {
+                                showToast = false
+                            }
+                        }
+                    }
+                }
+                Spacer()
             }
         }
         .edgesIgnoringSafeArea(.bottom)

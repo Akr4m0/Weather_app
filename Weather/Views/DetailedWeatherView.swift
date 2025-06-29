@@ -12,6 +12,15 @@ struct DetailedWeatherView: View {
     @State private var forecast: ForecastResponse?
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var lastUpdated = Date()
+    @State private var showToast = false
+    
+    // Time formatter
+    var timeFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter
+    }
     
     // Function to get day name
     func getDayName(from dateString: String) -> String {
@@ -59,10 +68,16 @@ struct DetailedWeatherView: View {
             Color(hue: 0.63, saturation: 1.0, brightness: 0.49)
                 .ignoresSafeArea()
             
-            if isLoading {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    .scaleEffect(1.5)
+            if isLoading && forecast == nil {
+                VStack(spacing: 20) {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(1.5)
+                    
+                    Text("Loading forecast...")
+                        .foregroundColor(.white)
+                        .font(.body)
+                }
             } else if let errorMessage = errorMessage {
                 VStack {
                     Image(systemName: "exclamationmark.triangle")
@@ -89,16 +104,27 @@ struct DetailedWeatherView: View {
             } else if let forecast = forecast {
                 ScrollView {
                     VStack(spacing: 20) {
-                        // Header
-                        Text("7-Day Forecast")
-                            .font(.title)
-                            .bold()
-                            .foregroundColor(.white)
-                            .padding(.top, 20)
-                        
-                        Text("\(forecast.city.name), \(forecast.city.country)")
-                            .font(.title3)
-                            .foregroundColor(.white.opacity(0.8))
+                        // Header with last updated
+                        VStack(spacing: 10) {
+                            Text("7-Day Forecast")
+                                .font(.title)
+                                .bold()
+                                .foregroundColor(.white)
+                            
+                            Text("\(forecast.city.name), \(forecast.city.country)")
+                                .font(.title3)
+                                .foregroundColor(.white.opacity(0.8))
+                            
+                            // Last updated indicator
+                            HStack {
+                                Image(systemName: "clock")
+                                    .font(.caption)
+                                Text("Updated: \(lastUpdated, formatter: timeFormatter)")
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.white.opacity(0.6))
+                        }
+                        .padding(.top, 20)
                         
                         // Filter to get one forecast per day
                         let uniqueDailyForecasts = getDailyForecasts(from: forecast.list)
@@ -113,6 +139,45 @@ struct DetailedWeatherView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 20)
                 }
+                .refreshable {
+                    await loadForecast()
+                    
+                    // Haptic feedback
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                    impactFeedback.impactOccurred()
+                    
+                    // Show toast
+                    withAnimation {
+                        showToast = true
+                    }
+                }
+            }
+            
+            // Toast notification
+            VStack {
+                if showToast {
+                    HStack(spacing: 12) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.title3)
+                        Text("Forecast updated")
+                            .font(.body)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(Color.black.opacity(0.8))
+                    .cornerRadius(25)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .padding(.top, 50)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            withAnimation {
+                                showToast = false
+                            }
+                        }
+                    }
+                }
+                Spacer()
             }
         }
         .task {
@@ -145,6 +210,7 @@ struct DetailedWeatherView: View {
                 latitude: latitude,
                 longitude: longitude
             )
+            lastUpdated = Date()
         } catch {
             errorMessage = "Failed to load forecast. Please try again."
             print("Error fetching forecast: \(error)")

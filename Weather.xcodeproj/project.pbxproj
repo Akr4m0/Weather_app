@@ -36,6 +36,9 @@
 		CAB02DA42D42EAD6002371AF /* CompassManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAB02DA32D42EAD6002371AF /* CompassManager.swift */; };
 		CAB02DA62D42EB1F002371AF /* CompassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAB02DA52D42EB1F002371AF /* CompassView.swift */; };
 		CAC334C62CEA7C9400018B30 /* WeatherManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAC334C52CEA7C9400018B30 /* WeatherManager.swift */; };
+		CACB90732E11753C00760F20 /* ErrorHandlingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = CACB90722E11753C00760F20 /* ErrorHandlingViews.swift */; };
+		CACB90752E1179DB00760F20 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CACB90742E1179DB00760F20 /* OnboardingView.swift */; };
+		CACB90772E117AD800760F20 /* FeedbackComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = CACB90762E117AD800760F20 /* FeedbackComponents.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,6 +92,9 @@
 		CAB02DA32D42EAD6002371AF /* CompassManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompassManager.swift; sourceTree = "<group>"; };
 		CAB02DA52D42EB1F002371AF /* CompassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompassView.swift; sourceTree = "<group>"; };
 		CAC334C52CEA7C9400018B30 /* WeatherManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherManager.swift; sourceTree = "<group>"; };
+		CACB90722E11753C00760F20 /* ErrorHandlingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandlingViews.swift; sourceTree = "<group>"; };
+		CACB90742E1179DB00760F20 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		CACB90762E117AD800760F20 /* FeedbackComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackComponents.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,6 +210,9 @@
 				CA40BE0D2D45775F00DB7B1E /* SearchBarView.swift */,
 				CA251D362D471A2E00FBEFB2 /* FavouritesView.swift */,
 				CA251D382D47221D00FBEFB2 /* LocationWeatherView.swift */,
+				CACB90722E11753C00760F20 /* ErrorHandlingViews.swift */,
+				CACB90742E1179DB00760F20 /* OnboardingView.swift */,
+				CACB90762E117AD800760F20 /* FeedbackComponents.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -350,6 +359,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CACB90732E11753C00760F20 /* ErrorHandlingViews.swift in Sources */,
 				CA251D292D4710E900FBEFB2 /* FavouritesViewModel.swift in Sources */,
 				CA40BE0E2D45775F00DB7B1E /* SearchBarView.swift in Sources */,
 				CAB02DA42D42EAD6002371AF /* CompassManager.swift in Sources */,
@@ -367,9 +377,11 @@
 				CA67F84A2CE6A3E6004C51AB /* LoadingView.swift in Sources */,
 				CA251D232D470D2100FBEFB2 /* SavedLocation.swift in Sources */,
 				CAAEBE1F2CF906800071E9E6 /* ModelData.swift in Sources */,
+				CACB90752E1179DB00760F20 /* OnboardingView.swift in Sources */,
 				CA251D372D471A2E00FBEFB2 /* FavouritesView.swift in Sources */,
 				CAB02DA22D42E630002371AF /* UserPreferences.swift in Sources */,
 				CAAEBE1D2CF9056C0071E9E6 /* WeatherView.swift in Sources */,
+				CACB90772E117AD800760F20 /* FeedbackComponents.swift in Sources */,
 				CA67F8482CE68C2E004C51AB /* WelcomeView.swift in Sources */,
 				CAAEBE282CFA3CDF0071E9E6 /* DetailedWeatherView.swift in Sources */,
 				CA40BE0A2D456FFE00DB7B1E /* MapViewModel.swift in Sources */,
